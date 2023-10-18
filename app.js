@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const Books  = require('./models/BooksModel')
 const app = express();
 app.use(express.json())
+//Get All Books
 app.get("/Books",async (req,res)=>{
     try{
         const books = await Books.find({});
@@ -12,6 +13,7 @@ app.get("/Books",async (req,res)=>{
         res.status(500).json({message: error.message})
     }
 })
+//Get Book By ID
 app.get("/Books/:id",async (req,res)=>{
     try{
         const {id} = req.params;
@@ -51,6 +53,7 @@ app.delete("/Books/:id",async (req,res)=>{
         res.status(500).json({message: error.message})
     }
 })
+//Add Books
 app.post("/Books",async (req,res)=>{
     try{
         const book = await Books.create(req.body);
