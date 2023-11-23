@@ -1,8 +1,10 @@
 const bookModel = require("../models/BooksModel");
 const Category = require("../models/categoryModel");
+const authorModel = require("../models/authorModel");
+
 const getAllBooks = (async (req,res)=>{
     try{
-        const books = await bookModel.find({});
+        const books = await bookModel.find({}).populate("author").populate("categories");
         res.status(200).json({model :books});
     }catch{
         console.log(req.body);
@@ -12,6 +14,11 @@ const getAllBooks = (async (req,res)=>{
 //Get Book By ID
 const getBookByID = (async (req,res)=>{
     try{
+        /* const books = await Book.find().byTitle('JavaScript');
+        const boo = await Book.findById('someBookId');
+        const jsonString = JSON.stringify(books);
+
+        const totalCost = book.calculateTotalCost(); */
         const {id} = req.params;
         const book = await bookModel.findById(id);
         res.status(200).json(book);
@@ -20,6 +27,18 @@ const getBookByID = (async (req,res)=>{
         res.status(500).json({message: error.message})
     }
 })
+//Get Books By AuthorID
+const getBookByAuthorID = (async (req, res) => {
+    const authorId = req.params.authorId; 
+
+    try {
+      const books = await bookModel.findByAuthor(authorId);
+      res.json(books);
+    } catch (err) {
+      res.status(500).json({ error: 'Unable to fetch books by author', message: err.message });
+    }
+  }
+)
 //Update Book
 const updateBook = (async (req,res)=>{
     try{
@@ -51,9 +70,28 @@ const deleteBook = (async (req,res)=>{
 })
 //Add Books
 const addBook = (async (req,res)=>{
-       try {
-        const book = await bookModel.create(req.body);
-        res.status(200).json(book);
+    const booksData = req.body;
+
+    try {
+    const createdBooks = [];
+    if (!Array.isArray(booksData)) {
+        return res.status(400).json({ message: 'Invalid request body. Expected an array of books.' });
+        }
+    // Loop through each book in the array and create it
+    for (const bookData of booksData) {
+      const book = await bookModel.create(bookData);
+      createdBooks.push(book);
+
+      // Update the author's books field with the ID of the new book
+      console.log('Author ID:', book.author);
+      await authorModel.findByIdAndUpdate(
+        book.author,
+        { $push: { books: book._id } },
+        { new: true }
+      );
+    }
+        
+        res.status(200).json(createdBooks);
        } catch (error) {
         console.error(error);
         res.json(500).json(error)
@@ -77,7 +115,8 @@ module.exports = {
     getBookByID :getBookByID,
     updateBook :updateBook,
     deleteBook :deleteBook,
-    addBook : addBook
+    addBook : addBook,
+    getBookByAuthorID
 
 
 

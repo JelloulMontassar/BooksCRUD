@@ -36,6 +36,16 @@ module.exports.isAdmin  = (req, res, next) => {
     }catch{
         res.status(401).json({error : error.message})    
     }
-
+}
+module.exports.isUser  = (req, res, next) => {
+      try {
+          if (req.auth.role==="user"){
+              next()
+          }else{
+              res.status(403).json({error : "no access to this route"})
+          }
+      }catch{
+          res.status(401).json({error : error.message})    
+      }
 
 }

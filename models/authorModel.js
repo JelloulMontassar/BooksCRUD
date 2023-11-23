@@ -7,7 +7,7 @@ const authorSchema = mongoose.Schema({
     lastname : {type : String },
     firstname : { type : String },
     nationality: {type:String},
-    books :[{type:Schema.Types.ObjectId,ref:"Books"}]
+    //books :[{type:Schema.Types.ObjectId,ref:"Books"}]
 
 })
 authorSchema.plugin(uniqueValidator);
